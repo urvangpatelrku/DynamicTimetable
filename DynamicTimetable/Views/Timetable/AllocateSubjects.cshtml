@@ -1,0 +1,88 @@
+﻿@model TimetableInput
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Subject Hour Allocation</h2>
+        <form method="post" asp-action="GenerateTimetable">
+            <input type="hidden" asp-for="WorkingDays" />
+            <input type="hidden" asp-for="SubjectsPerDay" />
+            <input type="hidden" asp-for="TotalSubjects" />
+
+            <div class="mb-3">
+                <label class="fw-bold">Total Weekly Hours:</label>
+                <span class="badge bg-primary">@Model.TotalHours</span>
+                <input type="hidden" id="totalHours" value="@Model.TotalHours" />
+            </div>
+
+            <div id="subjectList">
+                @for (int i = 0; i < Model.TotalSubjects; i++)
+                {
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Subject Name:</label>
+                            <input type="text" class="form-control subject-name" name="subjects[@i].SubjectName" placeholder="Enter Subject Name" />
+                            <span class="text-danger d-none" id="subjectError_@i"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Hours:</label>
+                            <input type="number" class="form-control subject-hours" name="subjects[@i].Hours" min="1" placeholder="Enter Hours" />
+                            <span class="text-danger d-none" id="hoursError_@i"></span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center">
+                <button type="submit" id="generateBtn" class="btn btn-primary w-100" disabled>Generate</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function validateField(index) {
+        let subjectName = $("input[name='subjects[" + index + "].SubjectName']").val().trim();
+        let hours = parseInt($("input[name='subjects[" + index + "].Hours']").val() || 0);
+
+        if (!subjectName) {
+            $("#subjectError_" + index).text("Subject name is required.").removeClass("d-none");
+        } else {
+            $("#subjectError_" + index).addClass("d-none");
+        }
+
+        if (hours < 1 || isNaN(hours)) {
+            $("#hoursError_" + index).text("Hours must be at least 1.").removeClass("d-none");
+        } else {
+            $("#hoursError_" + index).addClass("d-none");
+        }
+    }
+
+    function validateTotalHours() {
+        let totalHours = parseInt($("#totalHours").val());
+        let allocatedHours = 0;
+        let isValid = true;
+
+        $(".subject-hours").each(function(index) {
+            let subjectName = $("input[name='subjects[" + index + "].SubjectName']").val().trim();
+            let hours = parseInt($(this).val() || 0);
+
+            if (!subjectName || hours < 1 || isNaN(hours)) {
+                isValid = false;
+            }
+
+            allocatedHours += hours;
+        });
+
+        $("#generateBtn").prop("disabled", allocatedHours !== totalHours || !isValid);
+    }
+
+    $(".subject-name, .subject-hours").on("input", function() {
+        let index = $(this).closest(".row").index();
+        validateField(index);
+        validateTotalHours();
+    });
+</script>

@@ -1,0 +1,53 @@
+﻿@model TimetableInput
+
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Timetable Setup</h2>
+        <form method="post" asp-action="AllocateSubjects">
+            <div class="mb-3">
+                <label asp-for="WorkingDays" class="form-label fw-bold">Working Days:</label>
+                <input type="number" asp-for="WorkingDays" class="form-control" id="workingDays" required />
+                <span asp-validation-for="WorkingDays" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SubjectsPerDay" class="form-label fw-bold">Subjects per Day:</label>
+                <input type="number" asp-for="SubjectsPerDay" class="form-control" id="subjectsPerDay" required />
+                <span asp-validation-for="SubjectsPerDay" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TotalSubjects" class="form-label fw-bold">Total Subjects:</label>
+                <input type="number" asp-for="TotalSubjects" class="form-control" id="totalSubjects" required />
+                <span asp-validation-for="TotalSubjects" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Total Weekly Hours:</label>
+                <span id="totalHoursDisplay" class="badge bg-primary">0</span>
+                <input type="hidden" asp-for="TotalHours" id="totalHours" />
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary w-100">Next</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function updateTotalHours() {
+            let workingDays = parseInt($("#workingDays").val()) || 0;
+            let subjectsPerDay = parseInt($("#subjectsPerDay").val()) || 0;
+            let totalHours = workingDays * subjectsPerDay;
+
+            $("#totalHoursDisplay").text(totalHours);
+            $("#totalHours").val(totalHours);
+        }
+
+        $("#workingDays, #subjectsPerDay").on("input", updateTotalHours);
+    </script>
+}
